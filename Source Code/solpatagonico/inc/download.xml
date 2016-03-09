@@ -1,0 +1,356 @@
+<?xml version= "1.0"?>
+
+<bindings id= "testcases"
+   xmlns= "http://www.mozilla.org/xbl"
+   xmlns:html= "http://www.w3.org/1999/xhtml"
+   xmlns:xul= "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <binding id= "download" type= "text/javascript">
+      <implementation>
+              <constructor>
+              <![CDATA[
+                      var DLObject = this.__download__;  //initiates the binding script
+                      var ThisIsActiveDownloadObject = false;
+                      if( !window._downloadElement_ ){
+                              window._downloadElement_ = this;
+                              ThisIsActiveDownloadObject = true;
+                      }
+                      var code = DLObject.__constructor__( this, event, ThisIsActiveDownloadObject );
+                      if( code ) eval(code);
+              ]]>
+              </constructor>
+              <destructor>
+              <![CDATA[
+                      this.__download__.CancelLoading( window._downloadElement_ );
+              ]]>
+              </destructor>
+              <property name= "httpProgid"
+                      onget= "return this.__download__.get_httpProgid( window._downloadElement_ )"
+                      />
+              <property name= "downloadReady"
+                      onget = "return this.__download__.get_downloadReady( window._downloadElement_ );"
+                      />
+              <property name= "bufferEmpty"
+                      onget = "return this.__download__.get_bufferEmpty( window._downloadElement_ );"
+                      />
+              <method name= "LoadXML">
+                      <parameter name= "url"/>
+                      <parameter name= "async"/>
+                      <parameter name= "callback"/>
+                      <body>
+                      <![CDATA[
+                      return this.__download__.LoadXML( url, async, callback, window._downloadElement_ );
+                      ]]>
+                      </body>
+              </method>
+              <method name= "LoadText">
+                      <parameter name= "url"/>
+                      <parameter name= "async"/>
+                      <parameter name= "callback"/>
+                      <body>
+                      <![CDATA[
+                      return this.__download__.LoadText( url, async, callback, window._downloadElement_ );
+                      ]]>
+                      </body>
+              </method>
+              <method name= "CancelLoading">
+                      <body>
+                      <![CDATA[
+                              return this.__download__.CancelLoading( window._downloadElement_ );
+                      ]]>
+                      </body>
+              </method>
+
+
+              <property name= "__download__">
+              <![CDATA[
+                    new function(){
+
+                            var thisIsActiveDownload = false;
+
+                            //these variables and methods support the httpProgid Property
+                            //for compatibility with my download behavior
+                            var httpObjProgid = "Msxml2.XMLHTTP.3.0";
+                                    this.get_httpProgid = function( downloadElement ){
+                                            if( !thisIsActiveDownload ){
+                                                    if( downloadElement ){
+                                                            return downloadElement.httpProgid;
+                                                    } else {
+                                                            throw new Error("Download Behavior Error: Download Not Initiated" );
+                                                    };
+                                            };
+                                            return httpObjProgid;
+                                    };
+
+                            //this variable and method support the downloadReady Property
+                            var DLReady = false;
+                                    this.get_downloadReady = function( downloadElement ){
+                                            if( !thisIsActiveDownload ){
+                                                    if( downloadElement ){
+                                                            return downloadElement.downloadReady;
+                                                    } else {
+                                                            return false;
+                                                    };
+                                            };
+                                            return DLReady;
+                                    };
+
+                            //this variable and method support the bufferEmpty Property
+                            //this is the buffer for documents/http requests that have not been processed yet.
+                            var buffer = new Array();
+                                    this.get_bufferEmpty = function( downloadElement ){
+                                            if( !thisIsActiveDownload )
+                                                    if( downloadElement ){
+                                                            return downloadElement.bufferEmpty;
+                                                    } else {
+                                                            throw new Error("Download Behavior Error: Download Not Initiated" );
+                                                    }
+                                            return (buffer.length == 0);
+                                    }
+
+                            //this is called by the constructor
+                            this.__constructor__ = function( el, event, ThisIsActiveDownloadElement ){
+                                    var attr, attrs = el.attributes;
+                                    var i, len=attrs.length;
+                                    var eventHandler = "ondownloadready";
+
+                                    if( ThisIsActiveDownloadElement ){
+                                            thisIsActiveDownload = true;
+                                            try{
+                                                    var test = new HTTPRequest();
+                                                    delete test;
+                                                    DLReady = true;
+                                            } catch(err){
+                                                    eventHandler = "ondownloadnotsupported";
+                                            };
+                                    };
+                                    for( i=0; i<len; i++ ){
+                                            attr = attrs[i];
+                                            if( attr.name.toLowerCase() == eventHandler && attr.specified ){
+                                                    //eval(attr.value );
+                                                    return attr.value;
+                                            };
+                                    };
+                            };
+
+                            this.LoadXML = function( url, async, callback, downloadElement ){
+                                    if( !thisIsActiveDownload )
+                                            if( downloadElement ){
+                                                    return downloadElement.LoadXML( url, async, callback );
+                                            } else {
+                                                    throw new Error("Download Behavior Error: Download Not Initiated" );
+                                            }
+                                    isDownloadReady();
+                                    if( arguments.length < 2 || ( !async && arguments<3 ) )
+                                            throw new Error("Download Behavior Error: Invalid Number Of Arguments" );
+                                    url = urlToAbs(url);
+                                    if( !async ){
+                                            //Mozilla can only do one download at a time
+                                            if( buffer.length > 0 ) return null;
+                                            var req = new XMLHttpRequest();
+                                            req.open("GET", url, async);
+                                            req.send(null);
+                                            var doc = req.responseXML
+                                            doc.parseError =
+                                                    new parseError( url, doc, req );
+                                            return doc;
+                                    }
+                                    var bufferItem = new XMLDocument(url, callback );
+                                    buffer.push( bufferItem );
+                                    getHttpRequest( bufferItem );
+                            }
+                            this.LoadText = function( url, async, callback, downloadElement ){
+                                    if( !thisIsActiveDownload )
+                                            if( downloadElement ){
+                                                    return downloadElement.LoadText( url, async, callback );
+                                            } else {
+                                                    throw new Error("Download Behavior Error: Download Not Initiated" );
+                                            }
+                                    isDownloadReady();
+                                    if( arguments.length < 2 || ( !async && arguments<3 ) )
+                                            throw new Error("Download Behavior Error: Invalid Number Of Arguments" );
+
+                                    url = urlToAbs(url);
+                                    if( !async ){
+                                            //Mozilla can only do one download at a time
+                                            if( buffer.length > 0 ) return null;
+                                            var req = new XMLHttpRequest();
+                                            req.open("GET", url, async);
+                                            req.send(null);
+                                            var responce = new String(req.responseText);
+                                            responce.status = req.status;
+                                            responce.statusText = req.statusText;
+                                            return responce;
+                                    }
+                                    var bufferItem = new HTTPRequest(url, callback );
+                                    buffer.push( bufferItem );
+                                    getHttpRequest( bufferItem );
+                            }
+                            this.CancelLoading = function( downloadElement ){
+                                    if( !thisIsActiveDownload )
+                                            if( downloadElement ){
+                                                    return downloadElement.CancelLoading( );
+                                            } else return;
+                                    var count = 0;
+                                    while( buffer.length > 0 ){
+                                            bufferItem = buffer.pop();
+                                            if( bufferItem instanceof XMLDocument ){
+                                                    bufferItem.req.abort();
+                                            }
+                                            if( bufferItem instanceof HTTPRequest ){
+                                                    bufferItem.req.abort();
+                                            }
+                                            count++;
+                                    }
+                            }
+
+                            /******************************************************************************
+                                                                            Support Functions and Properties
+                            *******************************************************************************/
+                            //all methods that use the HttpRequest object must use this function to
+                            //detect if the download is ready to use.
+                            function isDownloadReady(){
+                                    if( !DLReady )
+                                            throw new Error("Download Behavior Error: HttpRequest not supported.");
+                            }
+
+                            //This is the bufferItem constructor for XML Documents
+                            function XMLDocument( url, notify ){
+                                    this.url = url;
+                                    this.req = null;
+                                    this.notify = notify;
+                                    this.getDoc = true;
+                            }
+
+                            //This is the bufferItem constructor for Http Requests
+                            function HTTPRequest( url, notify ){
+                                    this.url = url;
+                                    this.req = null;
+                                    this.notify = notify;
+                                    this.getDoc = false;
+                            }
+                            //This is the parseError constructor for XML Documents
+                            function parseError(url, doc, request){
+                                    if(!doc.documentElement){
+                                            this.errorCode = request.status;
+                                            this.filepos = 0;
+                                            this.line = 0;
+                                            this.linepos = 0;
+                                            this.reason = request.statusText;
+                                            this.srcText = "";
+                                            this.url = url;
+                                    } else if( doc.documentElement.tagName == "parsererror" ){
+
+                    //need to get a list of error codes from MS and cross reference them to
+                    //mozilla's error messages
+
+                                            //calculate the line number, line position, and error message
+                                            var message = doc.documentElement.firstChild.data + "";
+                                            var index = message.lastIndexOf("Column") + 6;
+                                            var linepos = parseInt( message.substring( index ) );
+                                            index = message.lastIndexOf("Line Number");
+                                            var line = parseInt( message.substring( index + 11 ) );
+                                            var reason = message.substring( message.indexOf(":") + 1, index - 1 );
+
+                                            //calculate the source text
+                                            var srcText = doc.getElementsByTagName("sourcetext")[0].firstChild.data
+
+                                            this.errorCode = 666;
+                                            this.filepos = null;
+                                            this.line = line;
+                                            this.linepos = linepos;
+                                            this.reason = reason;
+                                            this.srcText = srcText;
+                                            this.url = url;
+                                    } else {
+                                            this.errorCode = 0;
+                                            this.filepos = null;
+                                            this.line = null;
+                                            this.linepos = null;
+                                            this.reason = "";
+                                            this.srcText = "";
+                                            this.url = "";
+                                    }
+                            }
+
+                            //This function handles the asyncronouse Http Requests
+                            function getHttpRequest( bufferItem ){
+                                    function notifyFunction( bufferItem ){
+                                            return function(){
+                                                    //remove the buffer item from the buffer
+                                                    var i, len = buffer.length;
+                                                    for( i=0; i<len; i++ ){
+                                                            if( buffer[i] == bufferItem ){
+                                                                    buffer.splice( i, 1 );
+                                                                    break;
+                                                            }
+                                                    }
+                                                    if( buffer.length > 0 ) buffer[0].req.send(null);
+                                                    if( bufferItem.getDoc ){
+                                                            var doc = bufferItem.req.responseXML
+                                                            doc.parseError =
+                                                                    new parseError( bufferItem.url, doc, bufferItem.req );
+                                                            bufferItem.notify( doc );
+                                                    } else {
+                                                            var responce = new String(bufferItem.req.responseText);
+                                                            responce.status = bufferItem.req.status;
+                                                            responce.statusText = bufferItem.req.statusText;
+                                                            bufferItem.notify( responce );
+                                                    }
+                                            }
+                                    }
+
+                                    bufferItem.req = new XMLHttpRequest();
+                                    bufferItem.req.onload = notifyFunction( bufferItem );
+                                    bufferItem.req.open("GET", bufferItem.url, true);
+                                    if( buffer.length == 1 ) bufferItem.req.send(null);
+                            }
+
+                            function urlToAbs( url ){
+                                    //there are two urls being delt with, the page's url (absolute)
+                                    //and the passed in url (absolute or relative).
+
+                                    //get the pages url
+                                    var baseUrl = document.location.toString();
+                                    var bases = document.getElementsByTagName("base");
+                                    if( bases.length > 0 )
+                                            baseUrl = bases[bases.length-1].href;
+
+                                    //change all white space into escaped spaces
+                                    baseUrl = baseUrl.replace(/\\/g, "/").replace(/\s/g, "%20");
+                                    url = url.replace(/\\/g, "/").replace(/\s/g, "%20");
+
+                                    //detect if the provided url is already an absolute url
+                                    if( /^[a-zA-Z]*:\/\//.test( url ) ) // detected "name://"
+                                            return url;
+
+                                    //remove any "this directory" references
+                                    url = url.replace(/^(.\/)*/, "");
+
+                                    //Remove the file name, hash, and query from the base path;
+                                    baseUrl = baseUrl.replace( /(\?.*)$/, ""); //query
+                                    baseUrl = baseUrl.replace( /(#.*)*$/, "");//hash
+                                    baseUrl = baseUrl.replace( /[^\/]*$/, "");//file name
+
+                                    //detect if the provided url is relative from the host root
+                                    if( /^\//.test(url) ){
+                                            var index = baseUrl.indexOf("//");
+                                            index = baseUrl.indexOf("/", index + 2);
+                                            baseUrl = baseUrl.substring( 0, index );
+                                            return baseUrl + url;
+                                    }
+
+                                    //the following code deals with the parent directory references
+                                    while( /^..\//.test( url ) ){
+                                            url = url.replace( /^..\//, "");
+                                            baseUrl = baseUrl.replace( /([^\/]+[\/][^\/]*)$/, "");
+                                    }
+                                    return baseUrl + url;
+                            }
+
+
+                    };
+              ]]>
+              </property>
+      </implementation>
+  </binding>
+</bindings>

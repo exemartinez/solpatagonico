@@ -1,0 +1,159 @@
+.webfx-menu, .webfx-menu * {
+	/*
+	Set the box sizing to content box
+	in the future when IE6 supports box-sizing
+	there will be an issue to fix the sizes
+
+	There is probably an issue with IE5 mac now
+	because IE5 uses content-box but the script
+	assumes all versions of IE uses border-box.
+
+	At the time of this writing mozilla did not support
+	box-sizing for absolute positioned element.
+
+	Opera only supports content-box
+	*/
+	box-sizing:			content-box;
+	-moz-box-sizing:	content-box;
+}
+
+.webfx-menu {
+	position:			absolute;
+	z-index:			999;
+	visibility:			hidden;
+	width:				100px;
+	border:				1px solid black;
+	padding:			1px;
+	background:			white;
+	filter:				progid:DXImageTransform.Microsoft.Shadow(color="#777777", Direction=135, Strength=4) alpha(Opacity=90);
+	-moz-opacity:		0.9;
+}
+
+.webfx-menu-separator {
+	background: #cccccc;
+}
+
+.webfx-menu-empty {
+	display:			block;
+	border:				1px solid white;
+	padding:			2px 5px 2px 5px;
+	font-size:			11px;
+	font-family:		Tahoma, Verdan, Helvetica, Sans-Serfif;
+	color:				black;
+}
+
+.webfx-menu a {
+	display:			block;
+	
+	/* should be ignored by mz and op */
+	width:				expression(constExpression(ieBox ? "100%": "auto"));
+	height:				expression(constExpression("1px"));
+	
+	overflow:			visible;
+	padding:			2px 0px 2px 5px;
+	font-size:			11px;
+	font-family:		Verdana, Helvetica, Sans-Serfif;
+	text-decoration:	none;
+	vertical-align:		center;
+	color:				black;
+	border:				1px solid white;
+	cursor:				hand;
+}
+
+.webfx-menu-text {
+	display:			block;
+	
+	/* should be ignored by mz and op */
+	width:				expression(constExpression(ieBox ? "100%": "auto"));
+	height:				expression(constExpression("1px"));
+	
+	overflow:			visible;
+	padding:			2px 0px 2px 5px;
+	font-size:			11px;
+	font-family:		Verdana, Helvetica, Sans-Serfif;
+	vertical-align:		center;
+	color:				black;
+}
+
+.webfx-menu a:visited,
+.webfx-menu a:visited:hover {
+	color:	black;
+	text-decoration:	none;
+}
+
+.webfx-menu a:hover {
+	color:			black;
+	background:		#DFEBF1;
+	border:			1px solid #DFEBF1;
+	text-decoration:	none;
+}	
+
+.webfx-menu a .arrow {
+	float:			right;
+	border:			0;
+	width:			3px;
+	margin-right:	3px;
+	margin-top:		4px;
+}
+
+/* separtor */
+.webfx-menu div {
+	height:			0;
+	height:			expression(constExpression(ieBox ? "2px" : "0"));
+	border-top:		1px solid rgb(120,172,255);
+	border-bottom:	1px solid rgb(234,242,255);
+	overflow:		hidden;
+	margin:			2px 0px 2px 0px;
+	font-size:		0mm;
+}
+
+.webfx-menu-bar {
+	padding:		2px;
+	font-family:	Verdana, Helvetica, Sans-Serif;
+	font-size:		11px;
+	
+	/* IE5.0 has the wierdest box model for inline elements */
+	padding:		expression(constExpression(ie50 ? "0px" : "2px"));
+}
+
+.webfx-menu-bar a,
+.webfx-menu-bar a:visited {
+	/*border:				1px solid #DFEBF1;*/
+	padding:			1px 5px 1px 5px;
+	color:				black;
+	text-decoration:	none;
+
+	/* IE5.0 Does not paint borders and padding on inline elements without a height/width */
+	height:				expression(constExpression(ie50 ? "17px" : "auto"));
+}
+
+.webfx-menu-bar a:hover {
+	color:			black;
+	background:		#DFEBF1;
+	/*border-left:	1px solid #DFEBF1;
+	border-right:	1px solid #DFEBF1;
+	border-top:		1px solid #DFEBF1;
+	border-bottom:	1px solid #DFEBF1;*/
+	text-decoration:	none;
+}
+
+.webfx-menu-bar a .arrow {
+	border:			0;
+	float:			none;
+}
+
+.webfx-menu-bar a:active, .webfx-menu-bar a:focus {
+	-moz-outline:	none;
+	outline:		none;
+	/*
+		ie does not support outline but ie55 can hide the outline using
+		a proprietary property on HTMLElement. Did I say that IE sucks at CSS?
+	*/
+	background:		#DFEBF1;
+	ie-dummy:		expression(this.hideFocus=true);
+	/*border-left:	1px solid #DFEBF1;
+	border-right:	1px solid #DFEBF1;
+	border-top:		1px solid #DFEBF1;
+	border-bottom:	1px solid #DFEBF1;*/
+	text-decoration:	none;
+}

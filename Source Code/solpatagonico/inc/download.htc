@@ -1,0 +1,455 @@
+<?xml version= "1.0"?>
+<component id= "download">
+<comment>
+
+                       Download Behavior v1.0
+
+                       File:    download.htc
+                       Version: 1.0
+                       Date:    4-22-2001
+                       Author:  Jeffrey M. Yates
+                       Contact: PBWiz@PBWizard.com
+
+Purpose:
+
+This behavior is for synchronous and asynchronous loading
+of Text files and XML Documents.
+
+
+*******************************************************************************
+*                                                                             *
+*                       COPYRIGHT AND PERMISSION NOTICE                       *
+*                                                                             *
+*                                                                             *
+*  Copyright (c) 2000,2001 Jeffrey M. Yates                                   *
+*                                                                             *
+*  Contact: PBWiz@PBWizard.com                                                *
+*                                                                             *
+*  All rights reserved.                                                       *
+*                                                                             *
+*  Permission is hereby granted, free of charge, to any person obtaining a    *
+*  copy of this software and associated documentation files (the              *
+*  "Software"), to deal in the Software without restriction, including        *
+*  without limitation the rights to use, copy, modify, merge, publish,        *
+*  distribute, and/or sell copies of the Software, and to permit persons      *
+*  to whom the Software is furnished to do so, provided that the above        *
+*  copyright notice(s) and this permission notice appear in all copies of     *
+*  the Software and that both the above copyright notice(s) and this          *
+*  permission notice appear in supporting documentation.                      *
+*                                                                             *
+*  THE SOFTWARE IS PROVidED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS    *
+*  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                 *
+*  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT      *
+*  OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR           *
+*  HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL    *
+*  INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING     *
+*  FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,       *
+*  NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION       *
+*  WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.                              *
+*                                                                             *
+*  Except as contained in this notice, the name of a copyright holder         *
+*  shall not be used in advertising or otherwise to promote the sale, use     *
+*  or other dealings in this Software without prior written authorization     *
+*  of the copyright holder.                                                   *
+*                                                                             *
+*******************************************************************************
+
+//////////////////////////////////////////////////////
+//     Initiating an Instance of This Behavior      //
+//////////////////////////////////////////////////////
+
+Within a style tag use the following syntax
+
+<style type= "text/css">
+selector {
+        behavior: url(http://www.PBWizard.com/Bindings/download.htc);
+}
+</style>
+
+Within a style attribute use:
+
+<TAG style= "behavior: url(http://www.PBWizard.com/Bindings/download.htc);">
+</TAG>
+
+
+//////////////////////////////////////////////////////
+//                 Element Events                   //
+//////////////////////////////////////////////////////
+onDownloadReady                        - This is fired when the Behavior has been initialized.
+onDownloadNotSupported        - This is fired if the HttpRequest object is not supported.
+
+        Note:  Do not depend upon the event object in these event handlers.  They
+                        are not truely called via event, they are just called by script,
+                        thus the event object is dependant upon the script.
+
+
+/////////////////////////////////////
+//     Properties and Methods      //
+/////////////////////////////////////
+Any element implementing this behavior gain the following Properties and Methods:
+
+    Properties
+    =================================
+    httpProgid - this read-only property is the Program id used to construct the
+                                ActiveX XML Http Request object.
+
+                                Default value: "Msxml2.XMLHTTP.3.0"
+
+                                Possible Values:
+                                        "Microsoft.XMLHTTP"                        - comes with IE5 and IE5.5
+                                        "Msxml2.XMLHTTP.2.6"
+                                        "Msxml2.XMLHTTP.3.0"
+
+        bufferEmpty - this boolean property indicates if the download buffer is empty or not.
+
+        downloadReady - this boolean property indicates that the download binding is ready to
+                                be used.  This value will be false if and only if the browser does not
+                                support the HttpRequest object or the DOMDocument object.
+
+        LoadXML( sURL, bAsync, fCallback )
+                - This method us used to load an MS XML DOMDocument.
+
+                Arguments:
+                        sURL                - A string containing the URL of the document to be loaded
+                        bAsync                - A boolean indicating to load the document asynchronous.
+                        fCallback        - A function pointer pointing to the function to return the
+                                                        document as the first argument for asynchronous document
+                                                        loading.  This argument is required if bAsync is false and
+                                                        ignored if true.
+
+                Return Value:
+                        MS XML DOMDocument object for synchronous loading, else void.
+
+                Reference:
+                        See below URL for information on the DOMDocument object.
+                        http://msdn.microsoft.com/library/psdk/xmlsdk/xmld692s.htm
+
+
+        LoadText( sURL, bAsync, fCallback )
+                - This method us used to load a Text Document
+
+                Arguments:
+                        sURL                - A string containing the URL of the document to be loaded
+                        bAsync                - A boolean indicating to load the document asynchronous.
+                        fCallback        - A function pointer pointing to the function to return the
+                                                        text as the first argument for asynchronous document
+                                                        loading (see Return Value below for details about the value
+                                                        of the passed text value).  This argument is required if
+                                                        bAsync is false and ignored if true.
+
+                Return Value:
+                        Text Document as a String object for synchronous loading, else void.
+                        The returned String object has two added properties, status and statusText.
+                                status                - This property contains an integer that corrisponds to the
+                                                          status from the HTTP Header.  If the value of this is
+                                                          400 or larger then an error occured.
+                                statusText        - This property contains a string that corrisponds to the
+                                                          status message from the HTTP Header.
+
+        CancelLoading()
+                - This method is used to cancel all asynchronous DOMDocument and HTTPRequest downloads.
+
+                Arguments:
+                        None.
+
+                Return Value:
+                        None.
+
+
+</comment>
+<?component error= "true" debug= "true"?>
+
+<registration
+        description= "Download"
+        progid= "Download.WSC"
+        version= "1.00"
+        classid= "{f2303a90-352f-11d5-93c0-00a0c96893a6}"
+>
+</registration>
+
+<public>
+        <property name= "httpProgid"
+                get= "get_httpProgid"
+                />
+        <property name= "downloadReady"
+                get= "get_downloadReady"
+                />
+        <property name= "bufferEmpty"
+                get= "get_bufferEmpty"
+                />
+        <method name= "LoadXML">
+                <parameter name= "url"/>
+                <parameter name= "async"/>
+                <parameter name= "callback"/>
+        </method>
+        <method name= "LoadText">
+                <parameter name= "url"/>
+                <parameter name= "async"/>
+                <parameter name= "callback"/>
+        </method>
+        <method name= "CancelLoading">
+        </method>
+        <event name= "onDownloadReady" id= "DLReady"/>
+        <event name= "onDownloadNotSupported" id= "DLNS"/>
+        <attach event= "ondocumentready"
+                onevent= "__constructor__(event)"/>
+        <attach event= "ondetach"
+                onevent= "CancelLoading();"/>
+</public>
+
+<implements type= "Behavior" id= "Behavior"/>
+
+<script language= "javascript">
+//<![CDATA[
+        //these properties and methods support the httpProgid Property
+        var downloadElement;
+        var thisIsActiveDownload = false;
+
+        var httpObjProgid = "Msxml2.XMLHTTP.3.0";
+                function get_httpProgid(){
+                        if( !thisIsActiveDownload )
+                                if( downloadElement ){
+                                        return downloadElement.httpProgid;
+                                } else {
+                                        throw new Error("Download Behavior Error: Download Not Initiated" );
+                                }
+                        return httpObjProgid;
+                }
+
+        //this variable and method support the downloadReady Property
+        var DLReady = false;
+                function get_downloadReady(){
+                        if( !thisIsActiveDownload )
+                                if( downloadElement ){
+                                        return downloadElement.downloadReady;
+                                } else {
+                                        return false;
+                                }
+                        return DLReady;
+                }
+
+        //this function is called with the behavior has been attached
+        //to the element
+        function __constructor__(evt){
+                var attr, attrs = this.attributes;
+                var i, len=attrs.length;
+                var eventHandler = "onDownloadReady";
+                if( window._downloadElement_ ){
+                        downloadElement = window._downloadElement_;
+                } else {
+                        window._downloadElement_ = this;
+                        thisIsActiveDownload = true;
+                        try{
+                                var test = new ActiveXObject(httpObjProgid);
+                                delete test;
+                                DLReady = true;
+                        } catch(err){
+                                try{
+                                        httpObjProgid = "Msxml2.XMLHTTP.2.6";
+                                        var test = new ActiveXObject(httpObjProgid);
+                                        delete test;
+                                        DLReady = true;
+                                } catch(err){
+                                        try{
+                                                httpObjProgid = "Microsoft.XMLHTTP";
+                                                var test = new ActiveXObject(httpObjProgid);
+                                                delete test;
+                                                DLReady = true;
+                                        } catch(err){
+                                                eventHandler = "onDownloadNotSupported";
+                                        }
+                                }
+                        }
+                }
+                if( element.getAttribute(eventHandler) ) element[eventHandler]();
+        }
+
+        //this variable and method support the bufferEmpty Property
+        //this is the buffer for documents/http requests that have not been processed yet.
+        var buffer = new Array();
+                function get_bufferEmpty(){
+                        if( !thisIsActiveDownload )
+                                if( downloadElement ){
+                                        return downloadElement.bufferEmpty;
+                                } else {
+                                        throw new Error("Download Behavior Error: Download Not Initiated" );
+                                }
+                        return (buffer.length == 0);
+                }
+        //this function is the implementation of the LoadXML method
+        function LoadXML( url, async, callback ){
+                if( !thisIsActiveDownload )
+                        if( downloadElement ){
+                                return downloadElement.LoadXML( url, async, callback );
+                        } else {
+                                throw new Error("Download Behavior Error: Download Not Initiated" );
+                        }
+                if( arguments.length < 2 || ( !async && arguments<3 ) )
+                        throw new Error("Download Behavior Error: Invalid Number Of Arguments" );
+
+                if( !async ){
+                        var req = new ActiveXObject(httpObjProgid);
+                        req.open("GET", url, async);
+                        req.send();
+                        return req.responseXML;
+                }
+                var bufferItem = new XMLDocument(url, callback );
+                buffer.push( bufferItem );
+                getHttpRequest( bufferItem );
+        }
+
+        //this function is the implementation of the LoadText method
+        function LoadText( url, async, callback ){
+                if( !thisIsActiveDownload )
+                        if( downloadElement ){
+                                return downloadElement.LoadText( url, async, callback );
+                        } else {
+                                throw new Error("Download Behavior Error: Download Not Initiated" );
+                        }
+                if( arguments.length < 2 || ( !async && arguments<3 ) )
+                        throw new Error("Download Behavior Error: Invalid Number Of Arguments" );
+
+                if( !async ){
+                        var req = new ActiveXObject(httpObjProgid);
+                        req.open("GET", url, async);
+                        req.send();
+                        var responce = new String(req.responseText);
+                        responce.status = req.status;
+                        responce.statusText = req.statusText;
+                        return responce;
+                }
+                var bufferItem = new HTTPRequest(url, callback );
+                buffer.push( bufferItem );
+                getHttpRequest( bufferItem );
+        }
+
+        //this function is the implementation of the CancelLoading method
+        function CancelLoading(){
+                if( !thisIsActiveDownload )
+                        if( downloadElement ){
+                                return downloadElement.CancelLoading( );
+                        } else return;
+                while( buffer.length > 0 ){
+                        bufferItem = buffer.pop();
+                        bufferItem.req.abort();
+                }
+        }
+
+        /******************************************************************************
+                                                        Support Functions and Properties
+        *******************************************************************************/
+        //This is the bufferItem constructor for XML Documents
+        function XMLDocument( url, notify ){
+                this.url = url;
+                this.req = null;
+                this.notify = notify;
+                this.getDoc = true;
+        }
+
+        //This is the bufferItem constructor for Http Requests
+        function HTTPRequest( url, notify ){
+                this.url = url;
+                this.req = null;
+                this.notify = notify;
+                this.getDoc = false;
+        }
+
+        //This function handles the asyncronouse Http Requests
+        function getHttpRequest( bufferItem ){
+                function notifyFunction( bufferItem ){
+                        return function(){
+                                try{
+                                        if( bufferItem.req.readyState != 4 )
+                                                return;
+                                        if( bufferItem.getDoc && bufferItem.req.responseXML.readyState != 4 )
+                                                return;
+                                } catch(err){ return; }
+                                var notify = bufferItem.notify;
+                                bufferItem.notify = null;
+                                //remove the buffer item from the buffer
+                                var i, len = buffer.length;
+                                for( i=0; i<len; i++ ){
+                                        if( buffer[i] == bufferItem ){
+                                                buffer.splice( i, 1 );
+                                                break;
+                                        }
+                                }
+                                if( bufferItem.getDoc ){
+                                        if( notify ) notify( bufferItem.req.responseXML );
+                                } else {
+                                        var responce = new String(bufferItem.req.responseText);
+                                        responce.status = bufferItem.req.status;
+                                        responce.statusText = bufferItem.req.statusText;
+                                        if( notify ) notify( responce );
+                                }
+                        }
+                }
+
+                bufferItem.req = new ActiveXObject(httpObjProgid);
+                bufferItem.req.onreadystatechange = notifyFunction( bufferItem );
+                bufferItem.req.open("GET", bufferItem.url, false);
+                bufferItem.req.send();
+        }
+
+        /*  Update the Array methods */
+        if(!Array.prototype.push || Array(6,6,6,6).push(4) != 5)
+                Array.prototype.push = function ( items ){
+                        for(var x=0; x<arguments.length; x++)
+                                this[this.length] = arguments[x];
+                        return this.length;
+                };
+
+        if( !Array.prototype.pop )
+                Array.prototype.pop = function(){
+                        var old = this[this.length - 1];
+                        delete this[this.length - 1];
+                        this.length--;
+                        return old;
+                }
+
+        if( !Array.prototype.shift )
+                Array.prototype.shift = function(){
+                        var old = this[0];
+                        for(var x=0; x < this.length-1; x++)
+                                this[x] = this[x+1];
+                        delete this[this.length-1];
+                        this.length--;
+                        return old;
+                };
+        if(!Array.prototype.unshift || Array(6,6,6,6).unshift(4) != 5 )
+                Array.prototype.unshift = function ( items ){
+                //move items up the chain
+                        for(var x=this.length-1; x>=0; x--)
+                                this[x + arguments.length] = this[x];
+                        for(x=0; x<arguments.length; x++)
+                                this[x] = arguments[x];
+                        return this.length;
+                };
+        if(!Array.prototype.splice)
+                Array.prototype.splice = function ( start, deleteCount, items ){
+                    var results = new Array();
+                        //copy items to delete and store in return array
+                    for(var x=0; x<deleteCount; x++)
+                                results[x] = this[x + start];
+                        //shift all remaining elements down
+                        for(x=start; x<this.length - deleteCount; x++)
+                                this[x] = this[x + deleteCount];
+                        //remove elements from the end
+                        this.length -= deleteCount;
+                        if( arguments.length > 2 ){
+                                //make room for the provided items to be inserted
+                                for(x=this.length-1; x>= start; x--)
+                                        this[x + deleteCount] = this[x];
+                                //insert the provided items
+                                for(x=0; x<deleteCount; x++)
+                                        this[x + start] = arguments[x + 2];
+                        };
+                        return results;
+                };
+        /**********************************************************************
+                                                        Initialization code
+        **********************************************************************/
+//]]>
+</script>
+
+</component>
