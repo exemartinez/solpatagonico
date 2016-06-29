@@ -1,4 +1,4 @@
-# solpatagonico
+# Sol Patagonico
 
 This app, called simply "Sol Patagonico" is an example app made by a team of professionals for a given client in the Argentinian Patagonia. Basically, it handles a Hotel appliances and supplies.
 
