@@ -10,6 +10,7 @@ It includes:
 * Documentation: everything is in SPANISH; Analysis, Design, Testing. It is a complete documentation based in the Unified Process by Rational. We made extensive usage of UML 2.0
 
 "Sol Patagonico" allows the user to manage the supplies & provisions for a typical hotel.
+
 Copyright (C) 2009  Hernan Ezequiel Martinez
 
 This program is free software: you can redistribute it and/or modify
