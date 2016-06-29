@@ -9,26 +9,23 @@ It includes:
 * Source Code: basically, LAMP (Linux, Apache, MySql and PHP5).
 * Documentation: everything is in SPANISH; Analysis, Design, Testing. It is a complete documentation based in the Unified Process by Rational. We made extensive usage of UML 2.0
 
+"Sol Patagonico" allows the user to manage the supplies & provisions for a typical hotel.
+Copyright (C) 2009  Hernan Ezequiel Martinez
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #License GPL v3
-
-    "Sol Patagonico" allows the user to manage the supplies & provisions for a typical hotel.
-    Copyright (C) 2009  Hernan Ezequiel Martinez
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-GPL v3 License to wich this software is subject of:
 
 
                     GNU GENERAL PUBLIC LICENSE
